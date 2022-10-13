@@ -2,26 +2,50 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use App\Repository\ProfilRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProfilRepository::class)]
+#[ApiResource(operations: [
+    new Get(),
+    new Put(),
+    new Patch(),
+    new Delete(),
+    new GetCollection(),
+    new Post(),
+],
+    routePrefix: '/admin',
+    normalizationContext: ['groups' => ['profil:read']],
+    denormalizationContext: ['groups' => ['profil:write']]
+)]
 class Profil
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:write', 'user:write', 'profil:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['user:read', 'profil:read', 'profil:write'])]
     private ?string $libelle = null;
 
     #[ORM\Column]
+    #[Groups(['profil:read', 'profil:write'])]
     private ?bool $etat = null;
 
-    #[ORM\OneToMany(mappedBy: 'profil', targetEntity: User::class)]
+    #[ORM\OneToMany(mappedBy: 'profil', targetEntity: User::class, cascade: ['persist'])]
+    #[Groups(['profil:read'])]
     private Collection $user;
 
     public function __construct()

@@ -2,11 +2,22 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\CommentaireRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CommentaireRepository::class)]
+#[ApiResource(routePrefix: '/admin',
+    operations: [
+        new Get(),
+        new Put(),
+        new Patch(),
+        new Delete(),
+        new GetCollection(),
+        new Post(),
+    ])]
 class Commentaire
 {
     #[ORM\Id]
@@ -15,6 +26,8 @@ class Commentaire
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['read', 'write'])]
+
     private ?string $contenu = null;
 
     #[ORM\ManyToOne(inversedBy: 'commentaires')]

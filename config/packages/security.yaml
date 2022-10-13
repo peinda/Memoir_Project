@@ -3,9 +3,9 @@ security:
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     providers:
-        database:
+        app_user_provider:
             entity:
-                class: App\Entity\User
+                class: App\Entity\Use r
                 property: username
     firewalls:
         login:
