@@ -2,88 +2,54 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-use ApiPlatform\Metadata\Delete;
-use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Patch;
-use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ApiResource(operations: [
-    new Get(),
-    new Put(),
-    new Patch(),
-    new Delete(),
-    new GetCollection(),
-    new Post(),
-],
-    routePrefix: '/admin',
-    normalizationContext: ['groups' => ['user:read']],
-    denormalizationContext: ['groups' => ['user:write']]
-)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Groups(['user:read', 'user:write'])]
     private ?string $username = null;
 
     #[ORM\Column]
-    #[Groups(['user:read'])]
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
-    #[Groups(['user:write'])]
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'user:write', 'profil:read'])]
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'user:write', 'profil:read'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'user:write', 'profil:read'])]
     private ?string $adress = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'user:write'])]
     private ?string $tel = null;
 
     #[ORM\ManyToOne(inversedBy: 'user')]
-    #[Groups(['user:read', 'user:write'])]
     private ?Profil $profil = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Commentaire::class)]
-    #[Groups(['user:read', 'user:write'])]
     private Collection $commentaires;
-
-    #[ORM\ManyToMany(targetEntity: Commande::class, inversedBy: 'users')]
-    private Collection $commande;
 
     public function __construct()
     {
         $this->commentaires = new ArrayCollection();
-        $this->commande = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -118,11 +84,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
-
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-     
-        $roles[] = 'ROLE_'.$this->profil->getLibelle();
+        $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
@@ -244,30 +208,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $commentaire->setUser(null);
             }
         }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Commande>
-     */
-    public function getCommande(): Collection
-    {
-        return $this->commande;
-    }
-
-    public function addCommande(Commande $commande): self
-    {
-        if (!$this->commande->contains($commande)) {
-            $this->commande->add($commande);
-        }
-
-        return $this;
-    }
-
-    public function removeCommande(Commande $commande): self
-    {
-        $this->commande->removeElement($commande);
 
         return $this;
     }

@@ -34,10 +34,12 @@ class Profil
     #[ORM\GeneratedValue]
     #[ORM\Column]
     #[Groups(['user:write', 'user:write', 'profil:read'])]
+    #[Groups(['user:write', 'profil:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['user:read', 'profil:read', 'profil:write'])]
+    #[Groups(['user:read', 'user:write', 'profil:read', 'profil:write'])]
     private ?string $libelle = null;
 
     #[ORM\Column]
