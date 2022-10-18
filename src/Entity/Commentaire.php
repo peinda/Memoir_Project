@@ -2,22 +2,31 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use App\Repository\CommentaireRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CommentaireRepository::class)]
-#[ApiResource(routePrefix: '/admin',
-    operations: [
-        new Get(),
-        new Put(),
-        new Patch(),
-        new Delete(),
-        new GetCollection(),
-        new Post(),
-    ])]
+#[ApiResource(operations: [
+    new Get(),
+    new Put(),
+    new Patch(),
+    new Delete(),
+    new GetCollection(),
+    new Post(),
+],
+    routePrefix: '/admin',
+    normalizationContext: ['groups' => ['commentaire:read']],
+    denormalizationContext: ['groups' => ['commentaire:write']]
+)]
 class Commentaire
 {
     #[ORM\Id]

@@ -33,7 +33,7 @@ class Profil
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:write', 'user:write', 'profil:read'])]
+    #[Groups(['user:write', 'profil:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -45,7 +45,6 @@ class Profil
     private ?bool $etat = null;
 
     #[ORM\OneToMany(mappedBy: 'profil', targetEntity: User::class, cascade: ['persist'])]
-    #[Groups(['profil:read'])]
     private Collection $user;
 
     public function __construct()
