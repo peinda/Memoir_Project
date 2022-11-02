@@ -49,15 +49,18 @@ class Categorie
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(['categories:read','categories:write'])]
     private ?bool $etat = null;
 
     #[ORM\OneToMany(mappedBy: 'categorie', targetEntity: Produit::class)]
-    #[Groups(['categories:read','categories:write'])]
+    #[Groups(['categories:read'])]
     private Collection $produits;
 
     public function __construct()
     {
         $this->produits = new ArrayCollection();
+        $this->etat = true;
+        $this->date_creation = new \DateTimeImmutable('now');
     }
 
     public function getId(): ?int
