@@ -48,7 +48,7 @@ class Produit
     #[Groups(['produit:read', 'produit:write'])]
     private ?bool $etat = null;
 
-    #[ORM\Column(type: Types::BLOB)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['produit:read', 'produit:write'])]
     private $photo = null;
 
@@ -61,6 +61,7 @@ class Produit
     public function __construct()
     {
         $this->detailCommande = new ArrayCollection();
+        $this->etat = true;
     }
 
     public function getId(): ?int
@@ -104,21 +105,16 @@ class Produit
         return $this;
     }
 
-    public function getPhoto()
+    public function getPhoto(): string
     {
-        if ($this->photo!==null) {
-            $content = stream_get_contents($this->photo);
+        return $this->photo;
 
-            return base64_encode($content);
-        }
-        return null;
     }
 
-    public function setPhoto($photo): self
+    public function setPhoto(string $photo): self
     {
-        $this->photo = $photo;
-
-        return $this;
+      $this->photo = $photo;
+      return $this;
     }
 
     public function getCategorie(): ?Categorie
