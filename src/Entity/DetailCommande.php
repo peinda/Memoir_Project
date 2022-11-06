@@ -14,6 +14,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: DetailCommandeRepository::class)]
 #[ApiResource(operations: [
@@ -36,26 +37,31 @@ class DetailCommande
     private ?int $id = null;
 
     #[ORM\Column]
+    #[Groups([ 'commande:read', 'commande:write'])]
     private ?float $montant = null;
 
     #[ORM\Column]
+    #[Groups(['commande:read', 'commande:write'])]
     private ?float $total = null;
 
     #[ORM\Column]
+    #[Groups([ 'commande:read', 'commande:write', 'produit:write'])]
     private ?int $quantiteProduit = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateLivraison = null;
 
-    #[ORM\ManyToMany(targetEntity: Produit::class, mappedBy: 'detailCommande')]
-    private Collection $produits;
-
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(inversedBy: 'detail')]
     private ?Commande $commande = null;
+
+    #[ORM\ManyToOne(inversedBy: 'detailCommandes')]
+    private ?Produit $produit = null;
+
 
     public function __construct()
     {
-        $this->produits = new ArrayCollection();
+        $this->dateLivraison = new \DateTimeImmutable('now');
+
     }
 
     public function getId(): ?int
@@ -111,33 +117,6 @@ class DetailCommande
         return $this;
     }
 
-    /**
-     * @return Collection<int, Produit>
-     */
-    public function getProduits(): Collection
-    {
-        return $this->produits;
-    }
-
-    public function addProduit(Produit $produit): self
-    {
-        if (!$this->produits->contains($produit)) {
-            $this->produits->add($produit);
-            $produit->addDetailCommande($this);
-        }
-
-        return $this;
-    }
-
-    public function removeProduit(Produit $produit): self
-    {
-        if ($this->produits->removeElement($produit)) {
-            $produit->removeDetailCommande($this);
-        }
-
-        return $this;
-    }
-
     public function getCommande(): ?Commande
     {
         return $this->commande;
@@ -146,6 +125,18 @@ class DetailCommande
     public function setCommande(?Commande $commande): self
     {
         $this->commande = $commande;
+
+        return $this;
+    }
+
+    public function getProduit(): ?Produit
+    {
+        return $this->produit;
+    }
+
+    public function setProduit(?Produit $produit): self
+    {
+        $this->produit = $produit;
 
         return $this;
     }

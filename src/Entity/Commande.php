@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use App\Controller\CommandeController;
 use App\Repository\CommandeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -23,7 +24,9 @@ use Symfony\Component\Serializer\Annotation\Groups;
     new Patch(),
     new Delete(),
     new GetCollection(),
-    new Post(),
+    new Post(
+        controller: CommandeController::class
+    ),
 ],
     routePrefix: '/admin',
     normalizationContext: ['groups' => ['commande:read']],
@@ -40,7 +43,7 @@ class Commande
     #[Groups(['commande:read', 'commande:write'])]
     private ?float $prixTotal = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $adresseLivraison = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
@@ -49,15 +52,20 @@ class Commande
     #[ORM\Column(length: 255)]
     private ?string $num_Commande = null;
 
-    #[ORM\Column]
-    private ?bool $etat = null;
+    #[ORM\ManyToOne(inversedBy: 'commandes')]
+    private ?User $user = null;
 
-    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'commande')]
-    private Collection $users;
+    #[ORM\ManyToOne(inversedBy: 'commandes')]
+    private ?EtatCommande $etat = null;
+
+    #[ORM\OneToMany(mappedBy: 'commande', targetEntity: DetailCommande::class)]
+    private Collection $detail;
 
     public function __construct()
     {
+        $this->dateCom = new \DateTimeImmutable('now');
         $this->users = new ArrayCollection();
+        $this->detail = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -113,12 +121,24 @@ class Commande
         return $this;
     }
 
-    public function isEtat(): ?bool
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getEtat(): ?EtatCommande
     {
         return $this->etat;
     }
 
-    public function setEtat(bool $etat): self
+    public function setEtat(?EtatCommande $etat): self
     {
         $this->etat = $etat;
 
@@ -126,29 +146,33 @@ class Commande
     }
 
     /**
-     * @return Collection<int, User>
+     * @return Collection<int, DetailCommande>
      */
-    public function getUsers(): Collection
+    public function getDetail(): Collection
     {
-        return $this->users;
+        return $this->detail;
     }
 
-    public function addUser(User $user): self
+    public function addDetail(DetailCommande $detail): self
     {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-            $user->addCommande($this);
+        if (!$this->detail->contains($detail)) {
+            $this->detail->add($detail);
+            $detail->setCommande($this);
         }
 
         return $this;
     }
 
-    public function removeUser(User $user): self
+    public function removeDetail(DetailCommande $detail): self
     {
-        if ($this->users->removeElement($user)) {
-            $user->removeCommande($this);
+        if ($this->detail->removeElement($detail)) {
+            // set the owning side to null (unless already changed)
+            if ($detail->getCommande() === $this) {
+                $detail->setCommande(null);
+            }
         }
 
         return $this;
     }
+
 }

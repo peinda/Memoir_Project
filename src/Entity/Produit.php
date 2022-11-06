@@ -33,11 +33,11 @@ class Produit
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['produit:read'])]
+    #[Groups(['produit:read', 'detail:write', 'detail:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['produit:read', 'produit:write'])]
+    #[Groups(['produit:read', 'produit:write', 'detail:write', 'detail:read'])]
     private ?string $nom = null;
 
     #[ORM\Column]
@@ -55,13 +55,14 @@ class Produit
     #[ORM\ManyToOne(inversedBy: 'produits')]
     private ?Categorie $categorie = null;
 
-    #[ORM\ManyToMany(targetEntity: DetailCommande::class, inversedBy: 'produits')]
-    private Collection $detailCommande;
+    #[ORM\OneToMany(mappedBy: 'produit', targetEntity: DetailCommande::class)]
+    private Collection $detailCommandes;
+
 
     public function __construct()
     {
-        $this->detailCommande = new ArrayCollection();
         $this->etat = true;
+        $this->detailCommandes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -132,15 +133,16 @@ class Produit
     /**
      * @return Collection<int, DetailCommande>
      */
-    public function getDetailCommande(): Collection
+    public function getDetailCommandes(): Collection
     {
-        return $this->detailCommande;
+        return $this->detailCommandes;
     }
 
     public function addDetailCommande(DetailCommande $detailCommande): self
     {
-        if (!$this->detailCommande->contains($detailCommande)) {
-            $this->detailCommande->add($detailCommande);
+        if (!$this->detailCommandes->contains($detailCommande)) {
+            $this->detailCommandes->add($detailCommande);
+            $detailCommande->setProduit($this);
         }
 
         return $this;
@@ -148,8 +150,14 @@ class Produit
 
     public function removeDetailCommande(DetailCommande $detailCommande): self
     {
-        $this->detailCommande->removeElement($detailCommande);
+        if ($this->detailCommandes->removeElement($detailCommande)) {
+            // set the owning side to null (unless already changed)
+            if ($detailCommande->getProduit() === $this) {
+                $detailCommande->setProduit(null);
+            }
+        }
 
         return $this;
     }
+
 }
