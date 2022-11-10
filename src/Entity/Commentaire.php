@@ -35,19 +35,30 @@ class Commentaire
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['read', 'write'])]
+    #[Groups(['commentaire:read', 'commentaire:write'])]
 
     private ?string $contenu = null;
 
     #[ORM\ManyToOne(inversedBy: 'commentaires')]
+    #[Groups(['commentaire:read', 'commentaire:write'])]
+
     private ?User $user = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date = null;
 
+    #[ORM\ManyToOne(inversedBy: 'commentaires')]
+    #[Groups(['commentaire:read', 'commentaire:write'])]
+
+    private ?Produit $produit = null;
+
+    #[ORM\Column]
+    private ?bool $etat = null;
+
     public function __construct()
     {
         $this->date = new \DateTimeImmutable('now');
+        $this->etat=true;
     }
 
     public function getId(): ?int
@@ -87,6 +98,30 @@ class Commentaire
     public function setDate(\DateTimeInterface $date): self
     {
         $this->date = $date;
+
+        return $this;
+    }
+
+    public function getProduit(): ?Produit
+    {
+        return $this->produit;
+    }
+
+    public function setProduit(?Produit $produit): self
+    {
+        $this->produit = $produit;
+
+        return $this;
+    }
+
+    public function isEtat(): ?bool
+    {
+        return $this->etat;
+    }
+
+    public function setEtat(bool $etat): self
+    {
+        $this->etat = $etat;
 
         return $this;
     }

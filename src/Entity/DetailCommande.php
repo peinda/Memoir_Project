@@ -37,18 +37,19 @@ class DetailCommande
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups([ 'commande:read', 'commande:write'])]
+    #[Groups(['detail:read', 'commande:read', 'commande:write'])]
     private ?float $montant = null;
 
     #[ORM\Column]
-    #[Groups(['commande:read', 'commande:write'])]
+    #[Groups(['detail:read','commande:read', 'commande:write'])]
     private ?float $total = null;
 
     #[ORM\Column]
-    #[Groups([ 'commande:read', 'commande:write', 'produit:write'])]
+    #[Groups(['detail:read', 'commande:read', 'commande:write', 'produit:write'])]
     private ?int $quantiteProduit = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['detail:read', 'commande:read', 'commande:write', 'produit:write'])]
     private ?\DateTimeInterface $dateLivraison = null;
 
     #[ORM\ManyToOne(inversedBy: 'detail')]
