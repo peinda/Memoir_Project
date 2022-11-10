@@ -28,20 +28,22 @@ use Symfony\Component\Serializer\Annotation\Groups;
     routePrefix: '/admin',
     normalizationContext: ['groups' => ['produit:read']],
     denormalizationContext: ['groups' => ['produit:write']])]
+
+
 class Produit
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['produit:read', 'detail:write', 'detail:read'])]
+    #[Groups(['produit:read', 'detail:write', 'detail:read', 'commentaire:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['produit:read', 'produit:write', 'detail:write', 'detail:read'])]
+    #[Groups(['produit:read', 'produit:write', 'detail:write', 'detail:read', 'commentaire:read'])]
     private ?string $nom = null;
 
     #[ORM\Column]
-    #[Groups(['produit:read', 'produit:write'])]
+    #[Groups(['produit:read', 'produit:write', 'commentaire:read'])]
     private ?float $prix = null;
 
     #[ORM\Column]
@@ -58,11 +60,15 @@ class Produit
     #[ORM\OneToMany(mappedBy: 'produit', targetEntity: DetailCommande::class)]
     private Collection $detailCommandes;
 
+    #[ORM\OneToMany(mappedBy: 'produit', targetEntity: Commentaire::class)]
+    private Collection $commentaires;
+
 
     public function __construct()
     {
         $this->etat = true;
         $this->detailCommandes = new ArrayCollection();
+        $this->commentaires = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -154,6 +160,36 @@ class Produit
             // set the owning side to null (unless already changed)
             if ($detailCommande->getProduit() === $this) {
                 $detailCommande->setProduit(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Commentaire>
+     */
+    public function getCommentaires(): Collection
+    {
+        return $this->commentaires;
+    }
+
+    public function addCommentaire(Commentaire $commentaire): self
+    {
+        if (!$this->commentaires->contains($commentaire)) {
+            $this->commentaires->add($commentaire);
+            $commentaire->setProduit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCommentaire(Commentaire $commentaire): self
+    {
+        if ($this->commentaires->removeElement($commentaire)) {
+            // set the owning side to null (unless already changed)
+            if ($commentaire->getProduit() === $this) {
+                $commentaire->setProduit(null);
             }
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Odm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -32,6 +33,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
     normalizationContext: ['groups' => ['commande:read']],
     denormalizationContext: ['groups' => ['commande:write']]
 )]
+#[ApiFilter(SearchFilter::class, properties: ['user.id'])]
+
 class Commande
 {
     #[ORM\Id]
