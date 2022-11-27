@@ -8,7 +8,7 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 
 class UserFixtures extends Fixture implements DependentFixtureInterface{
 
-    private $encode;
+    private UserPasswordHasherInterface $encode;
 
     public function __construct(UserPasswordHasherInterface $encode)
     {
@@ -18,7 +18,7 @@ class UserFixtures extends Fixture implements DependentFixtureInterface{
     public function load(ObjectManager $manager)
     {
         $admin= new User() ;
-        $admin->setUsername("admin@mixfruit.com");
+        $admin->setUsername("admin11@mixfruit.com");
         $admin->setPassword($this->encode->hashPassword($admin,"@dmin@mixfruit"));
         $admin->setPrenom("Admin Admin");
         $admin->setAdress('Dakar Gnary Tally');

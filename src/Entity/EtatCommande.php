@@ -9,13 +9,13 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
-use App\Repository\ProfilRepository;
+use App\Repository\EtatCommandeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: ProfilRepository::class)]
+#[ORM\Entity(repositoryClass: EtatCommandeRepository::class)]
 #[ApiResource(operations: [
     new Get(),
     new Put(),
@@ -25,31 +25,26 @@ use Symfony\Component\Serializer\Annotation\Groups;
     new Post(),
 ],
     routePrefix: '/admin',
-    normalizationContext: ['groups' => ['profil:read']],
-    denormalizationContext: ['groups' => ['profil:write']]
+    normalizationContext: ['groups' => ['commande:read']],
+    denormalizationContext: ['groups' => ['commande:write']]
 )]
-class Profil
+class EtatCommande
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:write', 'profil:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['user:read', 'user:write', 'profil:read', 'profil:write'])]
+    #[Groups(['commande:read', 'commande:write'])]
     private ?string $libelle = null;
 
-    #[ORM\Column]
-    #[Groups(['profil:read', 'profil:write'])]
-    private ?bool $etat = null;
-
-    #[ORM\OneToMany(mappedBy: 'profil', targetEntity: User::class, cascade: ['persist'])]
-    private Collection $user;
+    #[ORM\OneToMany(mappedBy: 'etat', targetEntity: Commande::class)]
+    private Collection $commandes;
 
     public function __construct()
     {
-        $this->user = new ArrayCollection();
+        $this->commandes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -69,45 +64,34 @@ class Profil
         return $this;
     }
 
-    public function isEtat(): ?bool
-    {
-        return $this->etat;
-    }
-
-    public function setEtat(bool $etat): self
-    {
-        $this->etat = $etat;
-
-        return $this;
-    }
-
     /**
-     * @return Collection<int, User>
+     * @return Collection<int, Commande>
      */
-    public function getUser(): Collection
+    public function getCommandes(): Collection
     {
-        return $this->user;
+        return $this->commandes;
     }
 
-    public function addUser(User $user): self
+    public function addCommande(Commande $commande): self
     {
-        if (!$this->user->contains($user)) {
-            $this->user->add($user);
-            $user->setProfil($this);
+        if (!$this->commandes->contains($commande)) {
+            $this->commandes->add($commande);
+            $commande->setEtat($this);
         }
 
         return $this;
     }
 
-    public function removeUser(User $user): self
+    public function removeCommande(Commande $commande): self
     {
-        if ($this->user->removeElement($user)) {
+        if ($this->commandes->removeElement($commande)) {
             // set the owning side to null (unless already changed)
-            if ($user->getProfil() === $this) {
-                $user->setProfil(null);
+            if ($commande->getEtat() === $this) {
+                $commande->setEtat(null);
             }
         }
 
         return $this;
     }
+
 }
